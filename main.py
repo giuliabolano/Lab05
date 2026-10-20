@@ -36,7 +36,40 @@ def main(page: ft.Page):
     lista_strumenti = ft.ListView(expand=True, spacing=5, padding=10, auto_scroll=True)
 
     # Tutti i TextField per le info necessarie per aggiungere un nuovo strumento (tipo, marca, anno, contatore posti)
-    # TODO
+    # creazione dei campi di input e del contatore, preparo i componenti grafici (Textfield e pulsanti) che serviranno
+    #all'utente per digitare i dati del nuovo strumento
+    #l'interfaccia ha bisogno di raccogliere 3 informazioni str o int e di un sistema contatore con bottoni + e -
+
+    #campi per l'aggiunta di un nuovo strumento
+    input_tipo= ft.TextField(label="Tipo", expand=True)
+    input_marca= ft.TextField(label="Marca", expand=True)
+    input_anno= ft.TextField(label="Anno", expand=True)
+
+    #contatore per il valore in euro dello strumento
+    valore_euro= 0
+    txt_valore= ft.Text(value= "0", size=16)
+
+    def decrementa_valore(e):
+        nonlocal valore_euro   #NONLOCAL????
+        if valore_euro >= 50:
+            valore_euro -= 50
+            txt_valore.value = str(valore_euro)
+            page.update()
+
+    def incrementa_valore(e):
+        nonlocal valore_euro
+        valore_euro += 50
+        txt_valore.value = str(valore_euro)
+        page.update()
+
+    cnt_valore = ft.Row(
+        controls=[
+            ft.IconButton(ft.Icons.REMOVE, on_click=decrementa_valore),
+            txt_valore,
+            ft.IconButton(ft.Icons.ADD, on_click=incrementa_valore),
+        ],
+        alignment=ft.MainAxisAlignment.CENTER,
+    )
 
     # --- FUNZIONI APP ---
     def aggiorna_lista_strumenti():
@@ -58,14 +91,57 @@ def main(page: ft.Page):
         page.update()
 
     # Handlers per la gestione dei pulsanti utili all'inserimento di un nuovo strumento
-    # TODO
+    # controllo dei campi vuoti: si verifica che l'utente non abbia lasciato caselle vuote
+    #si verifica che l'anno inserito sia un numero valido convertendolo in int
+    #gestione dell'errore se si mette non un numero nell'anno
+    #se i controlli vanno a buon fine si aggiornano i dati per aggiungerli alla lista generale
+    #si svuotano i campi di testo (Textfield) e si richiama la funzione che aggiorna la schermata (ListView)
+    #per mostrare subito lo strumento appena aggiunto
+
+    def aggiungi_strumento_click(e):
+        # mettiamo i campi in una lista
+        campi = [input_tipo.value, input_marca.value, input_anno.value]
+
+        # controllo con un ciclo for se c'è un campo vuoto
+        for campo in campi:
+            if not campo or not campo.strip():
+                alert.show_alert("Errore: compila tutti i campi prima di procedere.")
+                return
+
+        # Estraiamo i valori puliti dai campi di testo
+        tipo = input_tipo.value.strip()
+        marca = input_marca.value.strip()
+        anno_str = input_anno.value.strip()
+
+        # Validazione numerica per l'anno di acquisto
+        try:
+            anno = int(anno_str)
+        except ValueError:
+            alert.show_alert("Errore: inserisci valori numerici validi per l'anno.")
+            return
+
+        # Aggiunta dello strumento all'interno della struttura dati del deposito
+        deposito.aggiungi_strumento(tipo=tipo, marca=marca, anno_acquisto=anno, valore=float(valore_euro))
+
+        # Pulizia dei campi di input dell'interfaccia
+        input_tipo.value = ""
+        input_marca.value = ""
+        input_anno.value = ""
+
+        # Aggiornamento grafico della lista a schermo
+        aggiorna_lista_strumenti()
+
 
     # --- EVENTI ---
     toggle_cambia_tema = ft.Switch(label="Tema scuro", value=True, on_change=cambia_tema)
     pulsante_conferma_responsabile = ft.ElevatedButton("Conferma", on_click=conferma_responsabile)
 
     # Pulsanti per la gestione dell'inserimento di un nuovo strumento
-    # TODO
+    # si crea fisicamente l'oggetto bottone grafico perché bisogna associare il bottone alla funzione logica
+    #creata nell'on_click=aggiungi_strumento_click scritto in precedenza in modo tale che premendolo si attivi tutto il codice
+    #di controllo e inserimento
+
+    pulsante_aggiungi_strumento = ft.ElevatedButton("Aggiungi Strumento", on_click= aggiungi_strumento_click)
 
     # --- LAYOUT ---
     page.add(
@@ -83,7 +159,15 @@ def main(page: ft.Page):
                alignment=ft.MainAxisAlignment.CENTER),
 
         # Sezione 3
-        # TODO
+        # inserimento del layout nella pagina, si posizionano gli elementi grafici creati all'interno della struttura della pagina
+        # lo si fa perché Flet ha bisogno che Titolo della sezione, la riga con i campi di input e il contatore, e il pulsante di conferma
+        #vengano aggiunti esplicitamente così che vengano visualizzati correttamente sullo schermo del computer
+
+        ft.Text("Aggiungi nuovo strumento", size=20),
+        ft.Row(controls=[input_tipo, input_marca, input_anno, cnt_valore],
+               alignment=ft.MainAxisAlignment.CENTER,
+               ),
+        pulsante_aggiungi_strumento,
 
         # Sezione 4
         ft.Divider(),
