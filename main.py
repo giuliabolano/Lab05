@@ -50,26 +50,23 @@ def main(page: ft.Page):
     txt_valore= ft.Text(value= "0", size=16)
 
     def decrementa_valore(e):
-        nonlocal valore_euro   #NONLOCAL????
-        if valore_euro >= 50:
+        valore_euro= int(txt_valore.value)
+        if valore_euro >=50:  #se il valore è almeno 50 allora si può togliere denaro per evitare di andare in negativo
             valore_euro -= 50
             txt_valore.value = str(valore_euro)
             page.update()
 
     def incrementa_valore(e):
-        nonlocal valore_euro
+        valore_euro = int(txt_valore.value)
         valore_euro += 50
         txt_valore.value = str(valore_euro)
         page.update()
 
     cnt_valore = ft.Row(
-        controls=[
-            ft.IconButton(ft.Icons.REMOVE, on_click=decrementa_valore),
+        controls=[ft.IconButton(ft.Icons.REMOVE, on_click=decrementa_valore),
             txt_valore,
-            ft.IconButton(ft.Icons.ADD, on_click=incrementa_valore),
-        ],
-        alignment=ft.MainAxisAlignment.CENTER,
-    )
+            ft.IconButton(ft.Icons.ADD, on_click=incrementa_valore)],
+        alignment=ft.MainAxisAlignment.CENTER)
 
     # --- FUNZIONI APP ---
     def aggiorna_lista_strumenti():
@@ -134,14 +131,14 @@ def main(page: ft.Page):
 
     # --- EVENTI ---
     toggle_cambia_tema = ft.Switch(label="Tema scuro", value=True, on_change=cambia_tema)
-    pulsante_conferma_responsabile = ft.ElevatedButton("Conferma", on_click=conferma_responsabile)
+    pulsante_conferma_responsabile = ft.Button("Conferma", on_click=conferma_responsabile)
 
     # Pulsanti per la gestione dell'inserimento di un nuovo strumento
     # si crea fisicamente l'oggetto bottone grafico perché bisogna associare il bottone alla funzione logica
     #creata nell'on_click=aggiungi_strumento_click scritto in precedenza in modo tale che premendolo si attivi tutto il codice
     #di controllo e inserimento
 
-    pulsante_aggiungi_strumento = ft.ElevatedButton("Aggiungi Strumento", on_click= aggiungi_strumento_click)
+    pulsante_aggiungi_strumento = ft.Button("Aggiungi Strumento", on_click= aggiungi_strumento_click)
 
     # --- LAYOUT ---
     page.add(
@@ -165,15 +162,13 @@ def main(page: ft.Page):
 
         ft.Text("Aggiungi nuovo strumento", size=20),
         ft.Row(controls=[input_tipo, input_marca, input_anno, cnt_valore],
-               alignment=ft.MainAxisAlignment.CENTER,
-               ),
+               alignment=ft.MainAxisAlignment.CENTER),
         pulsante_aggiungi_strumento,
 
         # Sezione 4
         ft.Divider(),
         ft.Text("Strumenti", size=20),
-        lista_strumenti,
-    )
+        lista_strumenti )
     aggiorna_lista_strumenti()
 
-ft.app(target=main)
+ft.run(main)
